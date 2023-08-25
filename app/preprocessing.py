@@ -7,6 +7,7 @@ import time
 
 def add_url(row):
     return f'https://www.imdb.com/title/tt{row}/'
+    
 
 def add_rating(df):
     ratings_df=pd.read_csv('data/ratings.csv')
