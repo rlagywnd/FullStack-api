@@ -1,27 +1,34 @@
-from typing import List,Optional
-from fastapi import FastAPI,Query
-from resolver import random_items
-app = FastAPI();
-a = 0;
-@app.get("/all/") #localhost:8000/
-async def all_movies():
-    result=random_items()
-    return {"message":result}
+from typing import List, Optional
+from fastapi import FastAPI, Query
+from recommender import *#item_based_recommendation,user_based_recommendation
+from resolver import random_items, random_genres_items
+from fastapi.middleware.cors import CORSMiddleware
 
-@app.get("/genres/{genre}")
-async def genre_movies(genre:str):
-    return {"message":f"genre:{genre}"}
-    
-
-@app.get("/user-based/")
-async def user_based(param: Optional[List[str]]=Query(None)):
-    return {"message":"user based"}
-
-@app.get("/item-based/{item_id}")
-async def user_based(item_id:str):
-    return {"message":f"item based:{item_id}"}
+app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message":"인덱스 주소입니다"}
+    return {"message": "인덱스 주소임"} 
 
+@app.get("/all/") 
+async def all_movies():
+    result = random_items()
+    return {"message": result} 
+
+@app.get("/genres/{genre}") # path param
+async def genre_movies(genre: str):
+    result= random_genres_items(genre)
+    return {"message": result} 
+
+@app.get("/user-based/") # query param
+async def user_based(params: Optional[List[str]] = Query(None)):
+    input_ratings_dict=dict(
+        ((int(x.split(":")[0]),float(x.split(":")[1])) for x in params)
+    )
+    result=user_based_recommendation(input_ratings_dict)
+    return {"message": result} 
+
+@app.get("/item-based/{item_id}")
+async def item_based(item_id: int):
+    result = item_based_recommendation(item_id)
+    return {"result": result}
